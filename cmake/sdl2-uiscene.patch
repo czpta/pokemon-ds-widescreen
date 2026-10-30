@@ -1,6 +1,6 @@
 diff -ru SDL2-2.32.10/src/video/uikit/SDL_uikitappdelegate.m ../b/SDL2-2.32.10/src/video/uikit/SDL_uikitappdelegate.m
 --- a/src/video/uikit/SDL_uikitappdelegate.m	2025-01-01 10:47:53
-+++ b/src/video/uikit/SDL_uikitappdelegate.m	2026-10-29 21:38:14
++++ b/src/video/uikit/SDL_uikitappdelegate.m	2026-10-29 22:12:55
 @@ -45,6 +45,13 @@
  #undef main
  #endif
@@ -53,7 +53,7 @@ diff -ru SDL2-2.32.10/src/video/uikit/SDL_uikitappdelegate.m ../b/SDL2-2.32.10/s
  
 diff -ru SDL2-2.32.10/src/video/uikit/SDL_uikitwindow.m ../b/SDL2-2.32.10/src/video/uikit/SDL_uikitwindow.m
 --- a/src/video/uikit/SDL_uikitwindow.m	2025-01-01 10:47:53
-+++ b/src/video/uikit/SDL_uikitwindow.m	2026-10-29 21:36:52
++++ b/src/video/uikit/SDL_uikitwindow.m	2026-10-29 22:21:15
 @@ -35,6 +35,8 @@
  #include "SDL_uikitevents.h"
  #include "SDL_uikitmodes.h"
@@ -63,7 +63,15 @@ diff -ru SDL2-2.32.10/src/video/uikit/SDL_uikitwindow.m ../b/SDL2-2.32.10/src/vi
  #import "SDL_uikitappdelegate.h"
  
  #import "SDL_uikitview.h"
-@@ -207,11 +209,29 @@
+@@ -103,6 +105,7 @@
+ 
+     data.uiwindow = uiwindow;
+ 
++
+     /* only one window on iOS, always shown */
+     window->flags &= ~SDL_WINDOW_HIDDEN;
+ 
+@@ -207,11 +210,29 @@
  
          /* ignore the size user requested, and make a fullscreen window */
          /* !!! FIXME: can we have a smaller view? */
@@ -97,3 +105,23 @@ diff -ru SDL2-2.32.10/src/video/uikit/SDL_uikitwindow.m ../b/SDL2-2.32.10/src/vi
          }
  
          if (SetupWindowData(_this, window, uiwindow, SDL_TRUE) < 0) {
+@@ -238,10 +259,18 @@
+         SDL_WindowData *data = (__bridge SDL_WindowData *) window->driverdata;
+         [data.uiwindow makeKeyAndVisible];
+ 
++        BOOL inScene = NO;
++
+         /* Make this window the current mouse focus for touch input */
+         display = SDL_GetDisplayForWindow(window);
+         displaydata = (__bridge SDL_DisplayData *) display->driverdata;
+-        if (displaydata.uiscreen == [UIScreen mainScreen]) {
++        /* (A window in the app's scene is the app's own, whichever display SDL finds for it: on a
++         * foldable iPhone's folded-out display that is not the main screen, and without the
++         * focus SDL drops every game controller event.) */
++        if (@available(iOS 13.0, *)) {
++            inScene = data.uiwindow.windowScene != nil && data.uiwindow.windowScene == SDL_uikit_window_scene;
++        }
++        if (inScene || displaydata.uiscreen == [UIScreen mainScreen]) {
+             SDL_SetMouseFocus(window);
+             SDL_SetKeyboardFocus(window);
+         }
