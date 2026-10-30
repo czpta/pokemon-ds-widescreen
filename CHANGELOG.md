@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **iPhone: the whole screen of a foldable iPhone, folded out too.** The app used to be shown
+  in a box the size of the outer screen; it now fills whichever screen it is on.
+- **iPhone: QUIT no longer leaves a black screen.** It saves and closes the app (iOS lets no
+  app start itself again); open it again for the game list.
 - **New: iPhone and iPad.** A sideloaded app (`pokemon-ds-wide-ios.ipa`, iOS 14 or newer): the
   same game list and games as on Android, with the ROMs, saves and settings in the Files app
   (On My iPhone > Pokemon DS Widescreen).
